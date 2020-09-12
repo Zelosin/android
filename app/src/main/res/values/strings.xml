@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Chel</string>
+    <string name="VIEW_ADD_NAME">Добавить</string>
+    <string name="VIEW_DELETE_NAME">Удалить</string>
+    <string name="VIEW_CHANGE_LOCALITY_NAME">Рус/Eng</string>
+    <string name="VIEW_DELETE_TOAST">Выберете строчку для удаления</string>
+</resources>

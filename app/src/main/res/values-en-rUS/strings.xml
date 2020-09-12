@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chel</string>
+    <string name="VIEW_ADD_NAME">Add</string>
+    <string name="VIEW_DELETE_NAME">Delete</string>
+    <string name="VIEW_CHANGE_LOCALITY_NAME">Rus/Eng</string>
+    <string name="VIEW_DELETE_TOAST">Select a line for delete</string>
+</resources>
