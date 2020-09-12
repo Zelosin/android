@@ -3,10 +3,14 @@ package com.zelosin;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -24,11 +28,14 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<String> mCountriesList = new ArrayList<>(Arrays.asList("Бразилия", "Аргентина", "Колумбия", "Чили", "Уругвай"));
+    List<String> mCountriesList = new ArrayList<>();
 
     private final static String BND_COUNTRIES = "COUNTRIES_BUNDLE";
     private final static String BND_LOCALITY = "LOCALITY_BUNDLE";
     private final static String BND_DELETE_GOAL = "DELETE_BUNDLE";
+
+    private final static String PREF_SETTINGS = "SETTINGS_PREF";
+    private final static String PREF_NEW_SER = "NEW_USER_PRED";
 
     private static boolean IS_NEXT_TAP_FOR_DELETE = false;
     private static boolean IS_ENG_LOCALITY = false;
@@ -71,6 +78,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        DBHelper mDataBaseHelper = new DBHelper(this);
+        SharedPreferences mLoginSettings = getSharedPreferences(PREF_SETTINGS, MODE_PRIVATE);
+
+        if(mLoginSettings.getBoolean(PREF_NEW_SER, true)){
+            Toast.makeText(this, getString(R.string.VIEW_LOGIN_TOAST), Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor mSettingsEditor = mLoginSettings.edit();
+            mSettingsEditor.putBoolean(PREF_NEW_SER, false);
+            mSettingsEditor.apply();
+            mDataBaseHelper.getWritableDatabase().execSQL("delete from "+ DBHelper.TABLE_DATA);
+        }
+
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(BND_COUNTRIES)) {
                 mCountriesList.clear();
@@ -96,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
         mCountriesListView.setOnItemClickListener((parent, v, position, id) -> {
             if (IS_NEXT_TAP_FOR_DELETE) {
                 mCountriesList.remove(position);
+                SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
+                mWritableDatabase.execSQL("delete from " + DBHelper.TABLE_DATA + " where " + DBHelper.KEY_ID + "=" + position);
                 IS_NEXT_TAP_FOR_DELETE = !IS_NEXT_TAP_FOR_DELETE;
             }
             mListViewAdapter.notifyDataSetChanged();
@@ -103,8 +123,28 @@ public class MainActivity extends AppCompatActivity {
 
         mCountriesListView.setAdapter(mListViewAdapter);
 
+        SQLiteDatabase mReadableDatabase = mDataBaseHelper.getReadableDatabase();
+
+        Cursor mDataBaseCursor = mReadableDatabase.query(DBHelper.TABLE_DATA, null, null, null, null, null, null);
+
+        if(mDataBaseCursor.moveToFirst()){
+            int mDataColumnIndex = mDataBaseCursor.getColumnIndex(DBHelper.KEY_DATA);
+            mCountriesList.clear();
+            mListViewAdapter.notifyDataSetChanged();
+            do{
+                mCountriesList.add(mDataBaseCursor.getString(mDataColumnIndex));
+            }while (mDataBaseCursor.moveToNext());
+        }
+
         findViewById(R.id.dAddButton).setOnClickListener((v) -> {
-            mCountriesList.add(new Date().toString());
+            String mInsertionValue = new Date().toString();
+            SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
+            ContentValues mDataBaseValues = new ContentValues();
+
+            mDataBaseValues.put(DBHelper.KEY_DATA, mInsertionValue);
+            mWritableDatabase.insert(DBHelper.TABLE_DATA, null, mDataBaseValues);
+
+            mCountriesList.add(mInsertionValue);
             mListViewAdapter.notifyDataSetChanged();
         });
 

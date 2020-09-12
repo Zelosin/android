@@ -4,4 +4,12 @@
     <string name="VIEW_DELETE_NAME">Удалить</string>
     <string name="VIEW_CHANGE_LOCALITY_NAME">Рус/Eng</string>
     <string name="VIEW_DELETE_TOAST">Выберете строчку для удаления</string>
+    <string name="VIEW_LOGIN_PLACEHOLDER">Логин</string>
+    <string name="VIEW_PASSWORD_PLACEHOLDER">Пароль</string>
+    <string name="VIEW_PASSWORD_SIGN_IN">Войти</string>
+    <string name="VIEW_PASSWORD_SIGN_UP">Зарегистрироваться</string>
+    <string name="VIEW_REGISTRATE">Зарегестрировать</string>
+    <string name="VIEW_REGISTRATION_SUCCESS_TOAST">Пользователь успешно зарегестрирован</string>
+    <string name="VIEW_REJECT_LOGIN_TOAST">Пользователь не найден</string>
+    <string name="VIEW_LOGIN_TOAST">Вы успешно авторизовались в качестве нового пользователя</string>
 </resources>
