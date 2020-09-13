@@ -28,10 +28,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<String> mCountriesList = new ArrayList<>();
+    private String[] mResourceMusicList;
+    private ArrayList<String> mMusicList;
 
     private final static String BND_COUNTRIES = "COUNTRIES_BUNDLE";
     private final static String BND_LOCALITY = "LOCALITY_BUNDLE";
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(BND_COUNTRIES, (ArrayList<String>) mCountriesList);
+        outState.putStringArrayList(BND_COUNTRIES, (ArrayList<String>) mMusicList);
         outState.putBoolean(BND_LOCALITY, IS_ENG_LOCALITY);
         outState.putBoolean(BND_DELETE_GOAL, IS_NEXT_TAP_FOR_DELETE);
     }
@@ -123,9 +125,17 @@ public class MainActivity extends AppCompatActivity {
         mDataBaseHelper = new DBHelper(this);
         mLoginSettings = getSharedPreferences(PREF_SETTINGS, MODE_PRIVATE);
 
+        mResourceMusicList = getResources().getStringArray(R.array.music);
+        mMusicList = new ArrayList<>(Arrays.asList(mResourceMusicList));
+
+        mListViewAdapter = new ArrayAdapter(this,
+                android.R.layout.simple_list_item_1, mMusicList);
+
         if(mLoginSettings.getBoolean(PREF_NEW_SER, true)){
             Toast.makeText(this, getString(R.string.VIEW_LOGIN_TOAST), Toast.LENGTH_SHORT).show();
             SharedPreferences.Editor mSettingsEditor = mLoginSettings.edit();
+            mMusicList.clear();
+            mListViewAdapter.notifyDataSetChanged();
             mSettingsEditor.putBoolean(PREF_NEW_SER, false);
             mSettingsEditor.apply();
             mDataBaseHelper.getWritableDatabase().execSQL("delete from "+ DBHelper.TABLE_DATA);
@@ -133,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(BND_COUNTRIES)) {
-                mCountriesList.clear();
-                mCountriesList.addAll(Objects.requireNonNull(savedInstanceState.getStringArrayList(BND_COUNTRIES)));
+                mMusicList.clear();
+                mMusicList.addAll(Objects.requireNonNull(savedInstanceState.getStringArrayList(BND_COUNTRIES)));
             }
             if (savedInstanceState.containsKey(BND_LOCALITY)) {
                 IS_ENG_LOCALITY = savedInstanceState.getBoolean(BND_LOCALITY);
@@ -148,12 +158,11 @@ public class MainActivity extends AppCompatActivity {
 
         applyLocality(switchApplicationLocality());
 
-        ListView mCountriesListView = (ListView) findViewById(R.id.countriesList);
+        ListView mMusicListView = (ListView) findViewById(R.id.countriesList);
 
-        mListViewAdapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1, mCountriesList);
 
-        mCountriesListView.setAdapter(mListViewAdapter);
+
+        mMusicListView.setAdapter(mListViewAdapter);
 
         SQLiteDatabase mReadableDatabase = mDataBaseHelper.getReadableDatabase();
 
@@ -161,10 +170,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(mDataBaseCursor.moveToFirst()){
             int mDataColumnIndex = mDataBaseCursor.getColumnIndex(DBHelper.KEY_DATA);
-            mCountriesList.clear();
+            mMusicList.clear();
             mListViewAdapter.notifyDataSetChanged();
             do{
-                mCountriesList.add(mDataBaseCursor.getString(mDataColumnIndex));
+                mMusicList.add(mDataBaseCursor.getString(mDataColumnIndex));
             }while (mDataBaseCursor.moveToNext());
         }
 
@@ -181,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             applyLocality(switchApplicationLocality());
         });
 
-        mCountriesListView.setOnItemClickListener((parent, v, position, id) -> {
+        mMusicListView.setOnItemClickListener((parent, v, position, id) -> {
             onItemClickAction(position);
         });
     }
@@ -192,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onItemClickAction(int position){
         if (IS_NEXT_TAP_FOR_DELETE) {
-            mCountriesList.remove(position);
+            mMusicList.remove(position);
             SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
             mWritableDatabase.execSQL("delete from " + DBHelper.TABLE_DATA + " where " + DBHelper.KEY_ID + "=" + position);
             IS_NEXT_TAP_FOR_DELETE = !IS_NEXT_TAP_FOR_DELETE;
@@ -215,14 +224,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addAction(){
-        String mInsertionValue = new Date().toString();
+        Date mCurrnetDate = new Date();
+        String mNewLine = mResourceMusicList[new Random().nextInt(mResourceMusicList.length)] +
+                " " + mCurrnetDate.getMinutes()+
+                ":" + mCurrnetDate.getSeconds();
+
         SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
         ContentValues mDataBaseValues = new ContentValues();
 
-        mDataBaseValues.put(DBHelper.KEY_DATA, mInsertionValue);
+        mDataBaseValues.put(DBHelper.KEY_DATA, mNewLine);
         mWritableDatabase.insert(DBHelper.TABLE_DATA, null, mDataBaseValues);
 
-        mCountriesList.add(mInsertionValue);
+        mMusicList.add(mNewLine);
         mListViewAdapter.notifyDataSetChanged();
     }
 }
