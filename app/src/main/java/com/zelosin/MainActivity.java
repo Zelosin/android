@@ -21,10 +21,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    List<String> mCountriesList = new ArrayList<>(Arrays.asList("Бразилия", "Аргентина", "Колумбия", "Чили", "Уругвай"));
+    private String[] mResourceMusicList;
+    private ArrayList<String> mMusicList;
 
     private final static String BND_COUNTRIES = "COUNTRIES_BUNDLE";
     private final static String BND_LOCALITY = "LOCALITY_BUNDLE";
@@ -36,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(BND_COUNTRIES, (ArrayList<String>) mCountriesList);
+
+
+        outState.putStringArrayList(BND_COUNTRIES, mMusicList);
         outState.putBoolean(BND_LOCALITY, IS_ENG_LOCALITY);
         outState.putBoolean(BND_DELETE_GOAL, IS_NEXT_TAP_FOR_DELETE);
     }
@@ -71,10 +75,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mResourceMusicList = getResources().getStringArray(R.array.music);
+        mMusicList =  new ArrayList<>(Arrays.asList(mResourceMusicList));
+
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(BND_COUNTRIES)) {
-                mCountriesList.clear();
-                mCountriesList.addAll(Objects.requireNonNull(savedInstanceState.getStringArrayList(BND_COUNTRIES)));
+                mMusicList.clear();
+                mMusicList.addAll(Objects.requireNonNull(savedInstanceState.getStringArrayList(BND_COUNTRIES)));
             }
             if (savedInstanceState.containsKey(BND_LOCALITY)) {
                 IS_ENG_LOCALITY = savedInstanceState.getBoolean(BND_LOCALITY);
@@ -88,23 +95,26 @@ public class MainActivity extends AppCompatActivity {
 
         applyLocality(switchApplicationLocality());
 
-        ListView mCountriesListView = (ListView) findViewById(R.id.countriesList);
+        ListView mMusicListView = (ListView) findViewById(R.id.countriesList);
 
         ArrayAdapter<String> mListViewAdapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1, mCountriesList);
+                android.R.layout.simple_list_item_1, mMusicList);
 
-        mCountriesListView.setOnItemClickListener((parent, v, position, id) -> {
+        mMusicListView.setOnItemClickListener((parent, v, position, id) -> {
             if (IS_NEXT_TAP_FOR_DELETE) {
-                mCountriesList.remove(position);
+                mMusicList.remove(position);
                 IS_NEXT_TAP_FOR_DELETE = !IS_NEXT_TAP_FOR_DELETE;
             }
             mListViewAdapter.notifyDataSetChanged();
         });
 
-        mCountriesListView.setAdapter(mListViewAdapter);
+        mMusicListView.setAdapter(mListViewAdapter);
 
         findViewById(R.id.dAddButton).setOnClickListener((v) -> {
-            mCountriesList.add(new Date().toString());
+            Date mCurrnetDate = new Date();
+            mMusicList.add(mResourceMusicList[new Random().nextInt(mResourceMusicList.length)] +
+                    " " + mCurrnetDate.getMinutes()+
+                    ":" + mCurrnetDate.getSeconds());
             mListViewAdapter.notifyDataSetChanged();
         });
 
