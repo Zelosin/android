@@ -12,4 +12,8 @@
     <string name="VIEW_REGISTRATION_SUCCESS_TOAST">Пользователь успешно зарегестрирован</string>
     <string name="VIEW_REJECT_LOGIN_TOAST">Пользователь не найден</string>
     <string name="VIEW_LOGIN_TOAST">Вы успешно авторизовались в качестве нового пользователя</string>
+    <string name="VIEW_ACTION_NAME">Выполнить</string>
+    <string name="VIEW_SIGNOUT_NAME">Выйти</string>
+    <string name="VIEW_ACTION_OPEN_MAPS">Открыть приложение карта</string>
+
 </resources>

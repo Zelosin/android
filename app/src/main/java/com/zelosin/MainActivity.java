@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -14,6 +15,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -39,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static boolean IS_NEXT_TAP_FOR_DELETE = false;
     private static boolean IS_ENG_LOCALITY = false;
+
+    private DBHelper mDataBaseHelper;
+    private ArrayAdapter<String> mListViewAdapter;
+
+    private SharedPreferences mLoginSettings;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -73,13 +81,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case(R.id.dAddMenuItem):{
+                addAction();
+                return true;
+            }
+            case(R.id.dDeleteMenuItem):{
+                deleteAction();
+                return true;
+            }
+            case(R.id.dSignoutMenuItem):{
+                signOutAction();
+                return true;
+            }
+            case(R.id.dChangeLocalityMenuItem):{
+                changeLocalityAction();
+                applyLocality(switchApplicationLocality());
+                return true;
+            }
+            case(R.id.dActionMenuItem):{
+                extraAction();
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DBHelper mDataBaseHelper = new DBHelper(this);
-        SharedPreferences mLoginSettings = getSharedPreferences(PREF_SETTINGS, MODE_PRIVATE);
+        mDataBaseHelper = new DBHelper(this);
+        mLoginSettings = getSharedPreferences(PREF_SETTINGS, MODE_PRIVATE);
 
         if(mLoginSettings.getBoolean(PREF_NEW_SER, true)){
             Toast.makeText(this, getString(R.string.VIEW_LOGIN_TOAST), Toast.LENGTH_SHORT).show();
@@ -108,18 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
         ListView mCountriesListView = (ListView) findViewById(R.id.countriesList);
 
-        ArrayAdapter<String> mListViewAdapter = new ArrayAdapter(this,
+        mListViewAdapter = new ArrayAdapter(this,
                 android.R.layout.simple_list_item_1, mCountriesList);
-
-        mCountriesListView.setOnItemClickListener((parent, v, position, id) -> {
-            if (IS_NEXT_TAP_FOR_DELETE) {
-                mCountriesList.remove(position);
-                SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
-                mWritableDatabase.execSQL("delete from " + DBHelper.TABLE_DATA + " where " + DBHelper.KEY_ID + "=" + position);
-                IS_NEXT_TAP_FOR_DELETE = !IS_NEXT_TAP_FOR_DELETE;
-            }
-            mListViewAdapter.notifyDataSetChanged();
-        });
 
         mCountriesListView.setAdapter(mListViewAdapter);
 
@@ -137,25 +169,60 @@ public class MainActivity extends AppCompatActivity {
         }
 
         findViewById(R.id.dAddButton).setOnClickListener((v) -> {
-            String mInsertionValue = new Date().toString();
-            SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
-            ContentValues mDataBaseValues = new ContentValues();
-
-            mDataBaseValues.put(DBHelper.KEY_DATA, mInsertionValue);
-            mWritableDatabase.insert(DBHelper.TABLE_DATA, null, mDataBaseValues);
-
-            mCountriesList.add(mInsertionValue);
-            mListViewAdapter.notifyDataSetChanged();
+            addAction();
         });
 
         findViewById(R.id.dDeleteButton).setOnClickListener((v) -> {
-            showDeleteToast();
-            IS_NEXT_TAP_FOR_DELETE = true;
+            deleteAction();
         });
 
         findViewById(R.id.dChangeLocalityButton).setOnClickListener((v) -> {
-            IS_ENG_LOCALITY = !IS_ENG_LOCALITY;
-            recreate();
+            changeLocalityAction();
+            applyLocality(switchApplicationLocality());
         });
+
+        mCountriesListView.setOnItemClickListener((parent, v, position, id) -> {
+            onItemClickAction(position);
+        });
+    }
+
+    private void signOutAction(){
+        startActivity(new Intent(this, LoginInActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+    }
+
+    private void onItemClickAction(int position){
+        if (IS_NEXT_TAP_FOR_DELETE) {
+            mCountriesList.remove(position);
+            SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
+            mWritableDatabase.execSQL("delete from " + DBHelper.TABLE_DATA + " where " + DBHelper.KEY_ID + "=" + position);
+            IS_NEXT_TAP_FOR_DELETE = !IS_NEXT_TAP_FOR_DELETE;
+        }
+        mListViewAdapter.notifyDataSetChanged();
+    }
+
+    private void deleteAction(){
+        showDeleteToast();
+        IS_NEXT_TAP_FOR_DELETE = true;
+    }
+
+    private void changeLocalityAction(){
+        IS_ENG_LOCALITY = !IS_ENG_LOCALITY;
+        recreate();
+    }
+
+    private void extraAction(){
+        startActivity(new Intent(this, ActionActivity.class));
+    }
+
+    private void addAction(){
+        String mInsertionValue = new Date().toString();
+        SQLiteDatabase mWritableDatabase = mDataBaseHelper.getWritableDatabase();
+        ContentValues mDataBaseValues = new ContentValues();
+
+        mDataBaseValues.put(DBHelper.KEY_DATA, mInsertionValue);
+        mWritableDatabase.insert(DBHelper.TABLE_DATA, null, mDataBaseValues);
+
+        mCountriesList.add(mInsertionValue);
+        mListViewAdapter.notifyDataSetChanged();
     }
 }

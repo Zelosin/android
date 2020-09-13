@@ -13,4 +13,7 @@
     <string name="VIEW_REGISTRATION_SUCCESS_TOAST">The user was registrated</string>
     <string name="VIEW_REJECT_LOGIN_TOAST">The user is not found</string>
     <string name="VIEW_LOGIN_TOAST">You are authorized as a new user</string>
+    <string name="VIEW_ACTION_NAME">Action</string>
+    <string name="VIEW_SIGNOUT_NAME">Sigout</string>
+    <string name="VIEW_ACTION_OPEN_MAPS">Open a map application</string>
 </resources>
