@@ -86,8 +86,15 @@ public class MainActivity extends AppCompatActivity {
         DBHelper mDataBaseHelper = new DBHelper(this);
         SharedPreferences mLoginSettings = getSharedPreferences(PREF_SETTINGS, MODE_PRIVATE);
 
+        ListView mMusicListView = (ListView) findViewById(R.id.countriesList);
+
+        ArrayAdapter<String> mListViewAdapter = new ArrayAdapter(this,
+                android.R.layout.simple_list_item_1, mMusicList);
+
         if(mLoginSettings.getBoolean(PREF_NEW_SER, true)){
             Toast.makeText(this, getString(R.string.VIEW_LOGIN_TOAST), Toast.LENGTH_SHORT).show();
+            mMusicList.clear();
+            mListViewAdapter.notifyDataSetChanged();
             SharedPreferences.Editor mSettingsEditor = mLoginSettings.edit();
             mSettingsEditor.putBoolean(PREF_NEW_SER, false);
             mSettingsEditor.apply();
@@ -110,11 +117,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         applyLocality(switchApplicationLocality());
-
-        ListView mMusicListView = (ListView) findViewById(R.id.countriesList);
-
-        ArrayAdapter<String> mListViewAdapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1, mMusicList);
 
         mMusicListView.setOnItemClickListener((parent, v, position, id) -> {
             if (IS_NEXT_TAP_FOR_DELETE) {
