@@ -16,7 +16,7 @@ class SmsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notifier.showNotification(getApplicationContext(), getSystemService(NOTIFICATION_SERVICE),
-                intent.getExtras().getString("sms_body"), "Chel");
+               "SMS сообщение:" + intent.getExtras().getString("sms_body"), "Chel");
         return START_STICKY;
     }
 }
