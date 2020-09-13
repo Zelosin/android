@@ -1,7 +1,11 @@
 package com.zelosin;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -56,7 +60,5 @@ public class LoginInActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT)
                         .show();
         }
-
-
     }
 }
